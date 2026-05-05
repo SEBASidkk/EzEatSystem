@@ -17,6 +17,8 @@
         "name": "next"
       }
     ],
+    "noUncheckedIndexedAccess": true,
+    "forceConsistentCasingInFileNames": true,
     "paths": {
       "@/*": ["./src/*"]
     }
