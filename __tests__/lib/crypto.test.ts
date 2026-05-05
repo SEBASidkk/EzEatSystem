@@ -38,4 +38,8 @@ describe('crypto', () => {
     const plaintext = 'x'.repeat(4000)
     expect(decrypt(encrypt(plaintext, VAULT_KEY), VAULT_KEY)).toBe(plaintext)
   })
+
+  it('throws on invalid key length', () => {
+    expect(() => encrypt('data', 'short')).toThrow('Invalid vault key')
+  })
 })

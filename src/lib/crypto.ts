@@ -8,6 +8,7 @@ export interface Encrypted {
 
 export function encrypt(plaintext: string, vaultKeyHex: string): Encrypted {
   const key = Buffer.from(vaultKeyHex, 'hex')
+  if (key.length !== 32) throw new Error(`Invalid vault key: expected 32 bytes, got ${key.length}`)
   const iv = randomBytes(12)
   const cipher = createCipheriv('aes-256-gcm', key, iv)
   const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()])
@@ -21,6 +22,7 @@ export function encrypt(plaintext: string, vaultKeyHex: string): Encrypted {
 
 export function decrypt(data: Encrypted, vaultKeyHex: string): string {
   const key = Buffer.from(vaultKeyHex, 'hex')
+  if (key.length !== 32) throw new Error(`Invalid vault key: expected 32 bytes, got ${key.length}`)
   const iv = Buffer.from(data.iv, 'base64')
   const tag = Buffer.from(data.tag, 'base64')
   const ciphertext = Buffer.from(data.encryptedValue, 'base64')
