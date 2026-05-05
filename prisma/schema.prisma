@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  DEV
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  BLOCKED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum CredentialCategory {
+  SERVICE
+  RESTAURANT
+  ACCOUNT
+  OTHER
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  role         Role     @default(DEV)
+  passwordHash String
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  createdCredentials Credential[] @relation("CreatedCredentials")
+  sharedCredentials  Credential[] @relation("SharedCredentials")
+  assignedTasks      Task[]       @relation("AssignedTasks")
+  createdTasks       Task[]       @relation("CreatedTasks")
+  auditLogs          AuditLog[]
+}
+
+model Credential {
+  id             String             @id @default(cuid())
+  name           String
+  category       CredentialCategory
+  encryptedValue String
+  iv             String
+  tag            String
+  notes          String?
+  userId         String
+  createdBy      User               @relation("CreatedCredentials", fields: [userId], references: [id])
+  sharedWith     User[]             @relation("SharedCredentials")
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+}
+
+model Task {
+  id           String       @id @default(cuid())
+  title        String
+  description  String?
+  status       TaskStatus   @default(TODO)
+  priority     TaskPriority @default(MEDIUM)
+  assignedToId String?
+  assignedTo   User?        @relation("AssignedTasks", fields: [assignedToId], references: [id])
+  createdById  String
+  createdBy    User         @relation("CreatedTasks", fields: [createdById], references: [id])
+  dueDate      DateTime?
+  tags         String[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Restaurant {
+  id        String   @id @default(cuid())
+  name      String
+  ezeatId   String   @unique
+  status    String   @default("unknown")
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  action       String
+  resourceType String
+  resourceId   String
+  ip           String
+  timestamp    DateTime @default(now())
+}
