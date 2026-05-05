@@ -32,6 +32,13 @@ enum CredentialCategory {
   OTHER
 }
 
+enum RestaurantStatus {
+  UNKNOWN
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -62,6 +69,9 @@ model Credential {
   sharedWith     User[]             @relation("SharedCredentials")
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([category])
 }
 
 model Task {
@@ -78,16 +88,20 @@ model Task {
   tags         String[]
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+
+  @@index([assignedToId])
+  @@index([createdById])
+  @@index([status, priority])
 }
 
 model Restaurant {
-  id        String   @id @default(cuid())
+  id        String           @id @default(cuid())
   name      String
-  ezeatId   String   @unique
-  status    String   @default("unknown")
+  ezeatId   String           @unique
+  status    RestaurantStatus @default(UNKNOWN)
   notes     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 }
 
 model AuditLog {
@@ -99,4 +113,8 @@ model AuditLog {
   resourceId   String
   ip           String
   timestamp    DateTime @default(now())
+
+  @@index([userId])
+  @@index([timestamp])
+  @@index([resourceType, resourceId])
 }
