@@ -11,7 +11,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
 
   return (
     <ToastProvider>
-      <div className="flex h-screen bg-gray-50">
+      <div className="flex h-screen bg-slate-100">
         <Sidebar role={role} />
         <div className="flex-1 flex flex-col overflow-hidden">
           <Header />
