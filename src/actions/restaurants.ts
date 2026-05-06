@@ -37,10 +37,15 @@ export async function listRestaurants() {
   }
 }
 
+export async function getRestaurantDetail(ezeatId: string) {
+  await requireSession()
+  return prisma.restaurant.findFirst({ where: { ezeatId } })
+}
+
 export async function patchRestaurantStatus(ezeatId: string, status: string) {
   const user = await requireSession()
   if (user.role !== 'ADMIN') throw new Error('Forbidden')
-  await updateRestaurantStatus(ezeatId, status)
+  await updateRestaurantStatus(ezeatId, status).catch(() => null)
   await prisma.restaurant.update({ where: { ezeatId }, data: { status: toDbStatus(status) } })
   revalidatePath('/restaurants')
 }

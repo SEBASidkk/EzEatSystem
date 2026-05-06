@@ -1,12 +1,11 @@
-import { patchRestaurantStatus } from '@/actions/restaurants'
-import { getRestaurant } from '@/lib/ezeat-client'
+import { patchRestaurantStatus, getRestaurantDetail } from '@/actions/restaurants'
 import { auth } from '@/lib/auth'
 
 export default async function RestaurantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const session = await auth()
   const role = (session?.user as { role?: string })?.role
-  const restaurant = await getRestaurant(id).catch(() => null)
+  const restaurant = await getRestaurantDetail(id).catch(() => null)
 
   if (!restaurant) {
     return <p className="text-gray-500">Restaurante no encontrado o Ez-eat no disponible.</p>
@@ -28,7 +27,7 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
               {['active', 'inactive', 'suspended'].map((s) => (
                 <form key={s} action={async () => {
                   'use server'
-                  await patchRestaurantStatus(restaurant.id, s)
+                  await patchRestaurantStatus(restaurant.ezeatId!, s)
                 }}>
                   <button type="submit" className="text-sm px-3 py-1.5 border rounded-lg hover:bg-gray-50">
                     {s}

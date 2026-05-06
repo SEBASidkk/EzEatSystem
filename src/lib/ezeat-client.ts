@@ -1,9 +1,10 @@
 const BASE_URL = process.env.EZEAT_API_URL
 const API_KEY = process.env.EZEAT_API_KEY
 
-interface EzEatRestaurant {
+export interface EzEatRestaurant {
   id: string
   name: string
+  slug: string
   status: string
   plan: string
   createdAt: string
@@ -21,7 +22,8 @@ async function fetchEzEat<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export async function getRestaurants(): Promise<EzEatRestaurant[]> {
-  return fetchEzEat<EzEatRestaurant[]>('/internal/restaurants')
+  const res = await fetchEzEat<{ success: boolean; data: EzEatRestaurant[] }>('/internal/restaurants')
+  return res.data ?? []
 }
 
 export async function getRestaurant(id: string): Promise<EzEatRestaurant> {

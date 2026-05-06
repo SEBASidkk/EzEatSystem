@@ -86,12 +86,16 @@ export async function revealCredential(id: string): Promise<string> {
   )
 }
 
-export async function deleteCredential(id: string) {
-  const user = await requireSession()
-  if (user.role !== 'ADMIN') throw new Error('Forbidden')
-  await prisma.credential.delete({ where: { id } })
-  await writeAuditLog(user.id, 'DELETE_CREDENTIAL', 'Credential', id)
-  revalidatePath('/vault')
+export async function deleteCredential(id: string): Promise<{ error: string } | void> {
+  try {
+    const user = await requireSession()
+    if (user.role !== 'ADMIN') throw new Error('Forbidden')
+    await prisma.credential.delete({ where: { id } })
+    await writeAuditLog(user.id, 'DELETE_CREDENTIAL', 'Credential', id)
+    revalidatePath('/vault')
+  } catch {
+    return { error: 'No se pudo eliminar' }
+  }
 }
 
 export async function shareCredential(credentialId: string, userId: string) {

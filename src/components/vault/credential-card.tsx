@@ -1,10 +1,13 @@
+'use client'
 import { RevealButton } from './reveal-button'
+import { DeleteCredentialButton } from './delete-credential-button'
 
 interface CredentialCardProps {
   id: string
   name: string
   category: string
   updatedAt: Date
+  isAdmin?: boolean
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -14,9 +17,9 @@ const CATEGORY_COLORS: Record<string, string> = {
   OTHER: 'bg-gray-100 text-gray-700',
 }
 
-export function CredentialCard({ id, name, category, updatedAt }: CredentialCardProps) {
+export function CredentialCard({ id, name, category, updatedAt, isAdmin }: CredentialCardProps) {
   return (
-    <div className="bg-white border rounded-lg p-4 space-y-3">
+    <div className="bg-white border rounded-lg p-4 space-y-3 animate-fade-slide hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
         <div>
           <p className="font-medium text-gray-900">{name}</p>
@@ -24,9 +27,12 @@ export function CredentialCard({ id, name, category, updatedAt }: CredentialCard
             Actualizado {new Date(updatedAt).toLocaleDateString('es-MX')}
           </p>
         </div>
-        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${CATEGORY_COLORS[category] ?? 'bg-gray-100 text-gray-700'}`}>
-          {category}
-        </span>
+        <div className="flex items-center gap-1">
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${CATEGORY_COLORS[category] ?? 'bg-gray-100 text-gray-700'}`}>
+            {category}
+          </span>
+          {isAdmin && <DeleteCredentialButton credentialId={id} />}
+        </div>
       </div>
       <div className="flex items-center gap-2">
         <span className="text-sm font-mono text-gray-400">••••••••••••</span>
