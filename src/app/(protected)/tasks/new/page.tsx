@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import { createTask } from '@/actions/tasks'
 import { prisma } from '@/lib/db'
 
+export const dynamic = 'force-dynamic'
+
 export default async function NewTaskPage() {
   const users = await prisma.user.findMany({ where: { active: true }, select: { id: true, name: true } })
 

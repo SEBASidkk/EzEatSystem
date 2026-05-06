@@ -38,8 +38,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as Record<string, unknown>).id = token.sub
-        ;(session.user as Record<string, unknown>).role = (token as Record<string, unknown>).role
+        (session.user as unknown as Record<string, unknown>).id = token.sub
+        ;(session.user as unknown as Record<string, unknown>).role = (token as Record<string, unknown>).role
       }
       return session
     },
