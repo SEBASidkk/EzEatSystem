@@ -1,33 +1,23 @@
 import { listUsers, createUser } from '@/actions/accounts'
-import { AccountList } from '@/components/accounts/account-list'
+import { AccessControlClient } from '@/components/accounts/account-list'
 
 export default async function AccountsPage() {
   const users = await listUsers()
 
   return (
-    <div>
-      <h1 className="text-xl font-bold text-gray-900 mb-6">Cuentas del Equipo</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white border rounded-lg p-6">
-          <h2 className="font-semibold text-gray-900 mb-4">Agregar miembro</h2>
-          <form action={createUser} className="space-y-3">
-            <input name="name" placeholder="Nombre" required className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
-            <input name="email" type="email" placeholder="Email" required className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
-            <input name="password" type="password" placeholder="Contraseña (mín. 8 chars)" required minLength={8} className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
-            <select name="role" className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
-              <option value="DEV">Dev</option>
-              <option value="ADMIN">Admin</option>
-            </select>
-            <button type="submit" className="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-800 active:scale-95 transition-transform">
-              Crear
-            </button>
-          </form>
-        </div>
+    <div className="space-y-6">
+      <div className="flex items-start justify-between">
         <div>
-          <h2 className="font-semibold text-gray-900 mb-4">Miembros</h2>
-          <AccountList users={users} />
+          <h1 className="text-2xl font-bold text-slate-900">Account &amp; Access Control</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Manage system users, roles, and global security policies.</p>
+        </div>
+        <div className="flex items-center gap-2 px-4 py-2 border border-teal-200 rounded-lg bg-teal-50">
+          <div className="w-2 h-2 rounded-full bg-teal-500" />
+          <span className="text-[10px] font-bold text-teal-700 uppercase tracking-widest">Encryption Level</span>
+          <span className="text-xs font-semibold text-teal-800">AES-256 Active</span>
         </div>
       </div>
+      <AccessControlClient users={users} createUser={createUser} />
     </div>
   )
 }

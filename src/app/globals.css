@@ -1,23 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary: #0F172A;
+  --color-secondary: #2563EB;
+  --color-tertiary: #0D9488;
+  --color-neutral: #64748B;
+  --color-bg: #F1F5F9;
+  --color-surface: #ffffff;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', sans-serif;
+  background: var(--color-bg);
+  color: var(--color-primary);
+  -webkit-font-smoothing: antialiased;
 }
 
 @layer utilities {
