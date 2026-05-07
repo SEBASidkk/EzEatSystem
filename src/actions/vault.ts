@@ -26,15 +26,23 @@ async function writeAuditLog(userId: string, action: string, resourceType: strin
 
 export async function listCredentials() {
   const user = await requireSession()
+  const select = {
+    id: true,
+    name: true,
+    category: true,
+    notes: true,
+    restaurantId: true,
+    restaurant: { select: { id: true, name: true } },
+    createdAt: true,
+    updatedAt: true,
+    userId: true,
+  }
   if (user.role === 'ADMIN') {
-    return prisma.credential.findMany({
-      select: { id: true, name: true, category: true, createdAt: true, updatedAt: true, userId: true },
-      orderBy: { updatedAt: 'desc' },
-    })
+    return prisma.credential.findMany({ select, orderBy: { updatedAt: 'desc' } })
   }
   return prisma.credential.findMany({
     where: { sharedWith: { some: { id: user.id } } },
-    select: { id: true, name: true, category: true, createdAt: true, updatedAt: true, userId: true },
+    select,
     orderBy: { updatedAt: 'desc' },
   })
 }
@@ -45,6 +53,7 @@ export async function createCredential(formData: FormData) {
     name: formData.get('name') as string,
     value: formData.get('value') as string,
     category: formData.get('category') as string,
+    restaurantId: (formData.get('restaurantId') as string) || undefined,
     notes: (formData.get('notes') as string) || undefined,
     sharedWith: [] as string[],
   }
@@ -63,6 +72,7 @@ export async function createCredential(formData: FormData) {
       tag: encrypted.tag,
       userId: user.id,
       notes: parsed.notes,
+      restaurantId: parsed.restaurantId ?? null,
     },
   })
   await writeAuditLog(user.id, 'CREATE_CREDENTIAL', 'Credential', credential.id)

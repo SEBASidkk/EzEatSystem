@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db'
 import { loginSchema } from '@/lib/validation'
 import { checkRateLimit, resetRateLimit } from '@/lib/rate-limit'
 import { authConfig } from '@/lib/auth.config'
+import { verifyTotpToken } from '@/lib/totp'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -22,14 +23,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const user = await prisma.user.findUnique({
           where: { email: parsed.data.email, active: true },
         })
-
         if (!user) return null
 
         const valid = await bcrypt.compare(parsed.data.password, user.passwordHash)
         if (!valid) return null
 
+        if (user.twoFactorEnabled && user.twoFactorSecret) {
+          const code = parsed.data.totpCode ?? ''
+          const totpValid = verifyTotpToken(code, user.twoFactorSecret)
+          if (!totpValid) return null
+        }
+
         resetRateLimit(rateLimitKey)
-        return { id: user.id, email: user.email, name: user.name, role: user.role }
+        return { id: user.id, email: user.email, name: user.name, role: user.role, twoFactorEnabled: user.twoFactorEnabled }
       },
     }),
   ],

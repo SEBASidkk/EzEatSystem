@@ -45,8 +45,10 @@ model User {
   name         String
   role         Role     @default(DEV)
   passwordHash String
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now())
+  active           Boolean  @default(true)
+  twoFactorEnabled Boolean  @default(false)
+  twoFactorSecret  String?
+  createdAt        DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   createdCredentials Credential[] @relation("CreatedCredentials")
@@ -64,6 +66,8 @@ model Credential {
   iv             String
   tag            String
   notes          String?
+  restaurantId   String?
+  restaurant     Restaurant? @relation(fields: [restaurantId], references: [id])
   userId         String
   createdBy      User               @relation("CreatedCredentials", fields: [userId], references: [id])
   sharedWith     User[]             @relation("SharedCredentials")
@@ -72,6 +76,7 @@ model Credential {
 
   @@index([userId])
   @@index([category])
+  @@index([restaurantId])
 }
 
 model Task {
@@ -95,13 +100,24 @@ model Task {
 }
 
 model Restaurant {
-  id        String           @id @default(cuid())
-  name      String
-  ezeatId   String           @unique
-  status    RestaurantStatus @default(UNKNOWN)
-  notes     String?
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
+  id           String           @id @default(cuid())
+  name         String
+  ezeatId      String           @unique
+  status       RestaurantStatus @default(UNKNOWN)
+  notes        String?
+  domain       String?
+  contactEmail String?
+  contactPhone String?
+  paymentDate  DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  credentials  Credential[]
+}
+
+model SystemSettings {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
 }
 
 model AuditLog {

@@ -12,10 +12,10 @@ const ACTIVITY_ICON: Record<string, { bg: string; text: string }> = {
 
 function activityLabel(action: string) {
   const map: Record<string, string> = {
-    CREATE_CREDENTIAL: 'New Credential Created',
-    REVEAL_CREDENTIAL: 'Credential Revealed',
-    DELETE_CREDENTIAL: 'Credential Deleted',
-    SHARE_CREDENTIAL:  'Credential Shared',
+    CREATE_CREDENTIAL: 'Credencial creada',
+    REVEAL_CREDENTIAL: 'Credencial revelada',
+    DELETE_CREDENTIAL: 'Credencial eliminada',
+    SHARE_CREDENTIAL:  'Credencial compartida',
   }
   return map[action] ?? action
 }
@@ -57,32 +57,32 @@ export default async function DashboardPage() {
       : Promise.resolve([] as { id: string; action: string; resourceType: string; timestamp: Date; user: { name: string } }[]),
   ])
 
-  const systemStatus = openTaskCount === 0 ? 'Optimal' : urgentTasks.length > 2 ? 'Alert' : 'Active'
-  const statusColor = systemStatus === 'Optimal' ? '#10B981' : systemStatus === 'Alert' ? '#EF4444' : '#2563EB'
+  const systemStatus = openTaskCount === 0 ? 'Óptimo' : urgentTasks.length > 2 ? 'Alerta' : 'Activo'
+  const statusColor = systemStatus === 'Óptimo' ? '#10B981' : systemStatus === 'Alerta' ? '#EF4444' : '#2563EB'
 
   const metrics = [
     {
-      label: 'NETWORK CREDENTIALS',
+      label: 'CREDENCIALES',
       value: credCount.toLocaleString(),
-      sub: '+3 this week',
+      sub: '+3 esta semana',
       icon: <ShieldCheck size={20} className="text-slate-400" />,
     },
     {
-      label: 'ACTIVE TASKS',
+      label: 'TAREAS ACTIVAS',
       value: openTaskCount.toLocaleString(),
-      sub: 'Processing across modules',
+      sub: 'En proceso',
       icon: <RefreshCw size={20} className="text-slate-400" />,
     },
     {
-      label: 'REGISTERED AFFILIATES',
+      label: 'NEGOCIOS AFILIADOS',
       value: restaurantCount.toLocaleString(),
-      sub: `+${Math.min(restaurantCount, 42)} this week`,
+      sub: `+${Math.min(restaurantCount, 42)} esta semana`,
       icon: <Building2 size={20} className="text-slate-400" />,
     },
     {
-      label: 'SYSTEM STATUS',
+      label: 'ESTADO DEL SISTEMA',
       value: systemStatus,
-      sub: 'All services verified',
+      sub: 'Todos los servicios verificados',
       icon: <ShieldCheck size={20} className="text-slate-400" />,
       valueColor: statusColor,
     },
@@ -93,13 +93,13 @@ export default async function DashboardPage() {
       {/* Page header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Executive Overview</h1>
-          <p className="text-sm text-slate-500 mt-0.5">System-wide metrics and critical administrative alerts.</p>
+          <h1 className="text-2xl font-bold text-slate-900">Panel General</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Métricas del sistema y alertas administrativas críticas.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+        <a href="/api/export" download className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
           <Download size={15} />
-          Export Report
-        </button>
+          Exportar reporte
+        </a>
       </div>
 
       {/* Metric cards */}
@@ -122,15 +122,15 @@ export default async function DashboardPage() {
         <div className="col-span-2 bg-white rounded-lg border border-slate-200">
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
             <p className="text-xs font-semibold tracking-widest text-slate-500 uppercase">
-              Flagged Tasks — Review Required
+              Tareas Marcadas — Revisión Requerida
             </p>
             <input
-              placeholder="Filter ID..."
+              placeholder="Filtrar ID..."
               className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs w-36 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           {urgentTasks.length === 0 ? (
-            <p className="px-5 py-8 text-sm text-slate-400 text-center">No flagged tasks.</p>
+            <p className="px-5 py-8 text-sm text-slate-400 text-center">Sin tareas marcadas.</p>
           ) : (
             <table className="w-full text-sm">
               <thead>
@@ -144,7 +144,7 @@ export default async function DashboardPage() {
               <tbody>
                 {(urgentTasks as { id: string; title: string; priority: string; status: string; assignedTo: { name: string } | null }[]).map((task) => {
                   const score = task.priority === 'URGENT' ? 85 + Math.floor(Math.random() * 10) : 40 + Math.floor(Math.random() * 25)
-                  const statusLabel = task.status === 'BLOCKED' ? 'SUSPENDED' : 'MANUAL REVIEW'
+                  const statusLabel = task.status === 'BLOCKED' ? 'SUSPENDIDA' : 'REVISIÓN MANUAL'
                   const statusCls = task.status === 'BLOCKED'
                     ? 'bg-red-100 text-red-700'
                     : 'border border-slate-300 text-slate-600'
@@ -171,7 +171,7 @@ export default async function DashboardPage() {
           )}
           <div className="px-5 py-3 border-t border-slate-100">
             <Link href="/tasks" className="text-xs font-semibold text-blue-600 hover:underline uppercase tracking-wide">
-              Load More Entries
+              Cargar más
             </Link>
           </div>
         </div>
@@ -179,14 +179,14 @@ export default async function DashboardPage() {
         {/* System activity */}
         <div className="bg-white rounded-lg border border-slate-200">
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-            <p className="text-xs font-semibold tracking-widest text-slate-500 uppercase">System Activity</p>
+            <p className="text-xs font-semibold tracking-widest text-slate-500 uppercase">Actividad del Sistema</p>
             <Link href="/audit" className="text-xs font-semibold text-blue-600 hover:underline uppercase tracking-wide">
-              View All
+              Ver todo
             </Link>
           </div>
           {recentActivity.length === 0 ? (
             <div className="px-5 py-8">
-              <p className="text-sm text-slate-400 text-center">No recent activity.</p>
+              <p className="text-sm text-slate-400 text-center">Sin actividad reciente.</p>
             </div>
           ) : (
             <div className="divide-y divide-slate-50">

@@ -48,3 +48,23 @@ export async function deleteTask(taskId: string) {
   await prisma.task.delete({ where: { id: taskId } })
   revalidatePath('/tasks')
 }
+
+export async function updateTask(taskId: string, formData: FormData) {
+  await requireSession()
+  const rawDueDate = formData.get('dueDate') as string | null
+  const raw = {
+    title: (formData.get('title') as string) || undefined,
+    description: (formData.get('description') as string) || undefined,
+    priority: (formData.get('priority') as string) || undefined,
+    assignedToId: (formData.get('assignedToId') as string) || undefined,
+    dueDate: rawDueDate || undefined,
+  }
+  const parsed = updateTaskSchema.parse({
+    ...raw,
+    title: raw.title ? sanitizeText(raw.title) : undefined,
+    description: raw.description ? sanitizeText(raw.description) : undefined,
+    dueDate: raw.dueDate ? new Date(raw.dueDate).toISOString() : undefined,
+  })
+  await prisma.task.update({ where: { id: taskId }, data: parsed })
+  revalidatePath('/tasks')
+}

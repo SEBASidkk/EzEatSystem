@@ -49,3 +49,39 @@ export async function patchRestaurantStatus(ezeatId: string, status: string) {
   await prisma.restaurant.update({ where: { ezeatId }, data: { status: toDbStatus(status) } })
   revalidatePath('/restaurants')
 }
+
+export async function updateRestaurant(id: string, formData: FormData) {
+  const session = await auth()
+  const user = session?.user as { id?: string; role?: string } | undefined
+  if (!session || user?.role !== 'ADMIN') throw new Error('Forbidden')
+
+  const notes        = (formData.get('notes') as string) || null
+  const domain       = (formData.get('domain') as string) || null
+  const contactEmail = (formData.get('contactEmail') as string) || null
+  const contactPhone = (formData.get('contactPhone') as string) || null
+  const rawDate      = formData.get('paymentDate') as string | null
+  const paymentDate  = rawDate ? new Date(rawDate) : null
+
+  await prisma.restaurant.update({
+    where: { id },
+    data: { notes, domain, contactEmail, contactPhone, paymentDate },
+  })
+  revalidatePath(`/restaurants/${id}`)
+  revalidatePath('/restaurants')
+}
+
+export async function createRestaurant(formData: FormData) {
+  const session = await auth()
+  const user = session?.user as { id?: string; role?: string } | undefined
+  if (!session || user?.role !== 'ADMIN') throw new Error('Forbidden')
+
+  const name  = (formData.get('name') as string)?.trim()
+  const notes = (formData.get('notes') as string) || null
+  if (!name) throw new Error('Nombre requerido')
+
+  const ezeatId = `manual-${Date.now()}`
+  await prisma.restaurant.create({
+    data: { name, ezeatId, status: RestaurantStatus.ACTIVE, notes },
+  })
+  revalidatePath('/restaurants')
+}

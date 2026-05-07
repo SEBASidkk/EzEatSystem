@@ -4,13 +4,17 @@ export const authConfig: NextAuthConfig = {
   providers: [],
   callbacks: {
     async jwt({ token, user }) {
-      if (user) (token as Record<string, unknown>).role = (user as Record<string, unknown>).role
+      if (user) {
+        (token as Record<string, unknown>).role = (user as Record<string, unknown>).role
+        ;(token as Record<string, unknown>).twoFactorEnabled = (user as Record<string, unknown>).twoFactorEnabled
+      }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
         (session.user as unknown as Record<string, unknown>).id = token.sub
         ;(session.user as unknown as Record<string, unknown>).role = (token as Record<string, unknown>).role
+        ;(session.user as unknown as Record<string, unknown>).twoFactorEnabled = (token as Record<string, unknown>).twoFactorEnabled
       }
       return session
     },

@@ -1,8 +1,10 @@
-import { listUsers, createUser } from '@/actions/accounts'
+import { listUsers, createUser, getSystemSettings } from '@/actions/accounts'
 import { AccessControlClient } from '@/components/accounts/account-list'
 
 export default async function AccountsPage() {
   const users = await listUsers()
+  const settings = await getSystemSettings()
+  const idleTimeoutMinutes = settings['idle_timeout_minutes'] ?? '480'
 
   return (
     <div className="space-y-6">
@@ -17,7 +19,7 @@ export default async function AccountsPage() {
           <span className="text-xs font-semibold text-teal-800">AES-256 Active</span>
         </div>
       </div>
-      <AccessControlClient users={users} createUser={createUser} />
+      <AccessControlClient users={users} createUser={createUser} idleTimeoutMinutes={idleTimeoutMinutes} />
     </div>
   )
 }

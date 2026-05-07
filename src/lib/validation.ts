@@ -3,12 +3,14 @@ import { z } from 'zod'
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
+  totpCode: z.string().optional(),
 })
 
 export const createCredentialSchema = z.object({
   name: z.string().min(1).max(100).trim(),
   value: z.string().min(1).max(5000),
   category: z.enum(['SERVICE', 'RESTAURANT', 'ACCOUNT', 'OTHER']),
+  restaurantId: z.string().optional(),
   sharedWith: z.array(z.string()).max(20).default([]),
   notes: z.string().max(500).optional(),
 })
@@ -34,6 +36,17 @@ export const createUserSchema = z.object({
   name: z.string().min(1).max(100).trim(),
   role: z.enum(['ADMIN', 'DEV']).default('DEV'),
   password: z.string().min(8).max(100),
+})
+
+export const updateUserSchema = z.object({
+  name: z.string().min(1).max(100).trim().optional(),
+  email: z.string().email().optional(),
+  role: z.enum(['ADMIN', 'DEV']).optional(),
+})
+
+export const systemSettingSchema = z.object({
+  key: z.string().min(1).max(100),
+  value: z.string().min(1).max(500),
 })
 
 export const sanitizeText = (text: string): string =>
