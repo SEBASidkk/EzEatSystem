@@ -5,20 +5,25 @@ export const authConfig: NextAuthConfig = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        (token as Record<string, unknown>).role = (user as Record<string, unknown>).role
-        ;(token as Record<string, unknown>).twoFactorEnabled = (user as Record<string, unknown>).twoFactorEnabled
+        const u = user as Record<string, unknown>
+        ;(token as Record<string, unknown>).role = u.role
+        ;(token as Record<string, unknown>).twoFactorEnabled = u.twoFactorEnabled
+        ;(token as Record<string, unknown>).idleTimeoutMs = u.idleTimeoutMs
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as unknown as Record<string, unknown>).id = token.sub
-        ;(session.user as unknown as Record<string, unknown>).role = (token as Record<string, unknown>).role
-        ;(session.user as unknown as Record<string, unknown>).twoFactorEnabled = (token as Record<string, unknown>).twoFactorEnabled
+        const t = token as Record<string, unknown>
+        const u = session.user as unknown as Record<string, unknown>
+        u.id = token.sub
+        u.role = t.role
+        u.twoFactorEnabled = t.twoFactorEnabled
+        u.idleTimeoutMs = t.idleTimeoutMs
       }
       return session
     },
   },
   pages: { signIn: '/login' },
-  session: { strategy: 'jwt', maxAge: 8 * 60 * 60 },
+  session: { strategy: 'jwt', maxAge: 24 * 60 * 60 },
 }

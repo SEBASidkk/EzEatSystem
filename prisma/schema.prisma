@@ -120,6 +120,14 @@ model SystemSettings {
   updatedAt DateTime @updatedAt
 }
 
+model RateLimit {
+  key     String   @id
+  count   Int      @default(0)
+  resetAt DateTime
+
+  @@index([resetAt])
+}
+
 model AuditLog {
   id           String   @id @default(cuid())
   userId       String

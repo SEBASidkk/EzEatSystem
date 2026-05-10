@@ -1,28 +1,29 @@
-const attempts = new Map<string, { count: number; resetAt: number }>()
+import { prisma } from './db'
 
 const MAX_ATTEMPTS = 5
-const WINDOW_MS = 15 * 60 * 1000 // 15 minutes
+const WINDOW_MS = 15 * 60 * 1000
 
-// NOTE: In-memory only. Does not survive restarts or scale across instances.
-// Replace with Redis/DB-backed store before production deployment.
-export function checkRateLimit(key: string): { allowed: boolean; remaining: number } {
-  const now = Date.now()
-  const record = attempts.get(key)
+export async function checkRateLimit(key: string): Promise<{ allowed: boolean }> {
+  const now = new Date()
+  const resetAt = new Date(Date.now() + WINDOW_MS)
 
-  if (!record || now > record.resetAt) {
-    attempts.set(key, { count: 1, resetAt: now + WINDOW_MS })
-    return { allowed: true, remaining: MAX_ATTEMPTS - 1 }
+  const record = await prisma.rateLimit.findUnique({ where: { key } })
+
+  if (!record || record.resetAt < now) {
+    await prisma.rateLimit.upsert({
+      where: { key },
+      update: { count: 1, resetAt },
+      create: { key, count: 1, resetAt },
+    })
+    return { allowed: true }
   }
 
-  if (record.count >= MAX_ATTEMPTS) {
-    return { allowed: false, remaining: 0 }
-  }
+  if (record.count >= MAX_ATTEMPTS) return { allowed: false }
 
-  const newCount = record.count + 1
-  attempts.set(key, { ...record, count: newCount })
-  return { allowed: true, remaining: MAX_ATTEMPTS - newCount }
+  await prisma.rateLimit.update({ where: { key }, data: { count: { increment: 1 } } })
+  return { allowed: true }
 }
 
-export function resetRateLimit(key: string): void {
-  attempts.delete(key)
+export async function resetRateLimit(key: string): Promise<void> {
+  await prisma.rateLimit.delete({ where: { key } }).catch(() => null)
 }

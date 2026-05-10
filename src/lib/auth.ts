@@ -17,7 +17,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const ip = request.headers.get('x-forwarded-for') ?? 'unknown'
         const rateLimitKey = `login:${ip}`
-        const { allowed } = checkRateLimit(rateLimitKey)
+        const { allowed } = await checkRateLimit(rateLimitKey)
         if (!allowed) return null
 
         const user = await prisma.user.findUnique({
@@ -34,8 +34,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (!totpValid) return null
         }
 
-        resetRateLimit(rateLimitKey)
-        return { id: user.id, email: user.email, name: user.name, role: user.role, twoFactorEnabled: user.twoFactorEnabled }
+        await resetRateLimit(rateLimitKey)
+
+        const setting = await prisma.systemSettings.findUnique({ where: { key: 'idle_timeout_minutes' } })
+        const idleTimeoutMs = parseInt(setting?.value ?? '480') * 60 * 1000
+
+        return { id: user.id, email: user.email, name: user.name, role: user.role, twoFactorEnabled: user.twoFactorEnabled, idleTimeoutMs }
       },
     }),
   ],
