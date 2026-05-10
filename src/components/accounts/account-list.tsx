@@ -113,7 +113,7 @@ export function AccessControlClient({ users, createUser, idleTimeoutMinutes }: P
   function handleSaveIdleTimeout() {
     startTransition(async () => {
       await updateSystemSetting('idle_timeout_minutes', idleTimeout)
-      toast('Timeout actualizado', 'success')
+      toast('Tiempo de inactividad actualizado', 'success')
     })
   }
 
@@ -224,20 +224,22 @@ export function AccessControlClient({ users, createUser, idleTimeoutMinutes }: P
           </div>
         </div>
 
-        <div className="rounded-lg p-5 text-white" style={{ backgroundColor: '#0F172A' }}>
+        <div className="bg-white rounded-lg border border-slate-200 p-5">
           <div className="flex items-start justify-between mb-3">
-            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Alerta de Política</p>
-            <AlertTriangle size={18} className="text-blue-400" />
+            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Alerta de Política</p>
+            <AlertTriangle size={18} className="text-slate-400" />
           </div>
-          <p className="font-semibold text-white mb-1.5">Rotación de Contraseñas</p>
-          <p className="text-xs text-slate-400 mb-5">
+          <p className="font-semibold text-slate-900 mb-1.5">Rotación de Contraseñas</p>
+          <p className="text-xs text-slate-500 mb-4">
             {suspendedCount > 0
               ? `${suspendedCount} cuenta${suspendedCount !== 1 ? 's' : ''} suspendida${suspendedCount !== 1 ? 's' : ''}.`
               : 'Todas las cuentas están activas.'}
           </p>
-          <button onClick={() => setShowAddForm(true)} className="w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-colors hover:opacity-90" style={{ backgroundColor: '#2563EB' }}>
-            Revisar Cuentas
-          </button>
+          <div className="border-t border-slate-100 pt-4">
+            <button onClick={() => setShowAddForm(true)} className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors">
+              Agregar usuario →
+            </button>
+          </div>
         </div>
       </div>
 
@@ -300,7 +302,7 @@ export function AccessControlClient({ users, createUser, idleTimeoutMinutes }: P
                 <tr><td colSpan={6} className="px-5 py-10 text-center text-sm text-slate-400">Sin usuarios.</td></tr>
               ) : (
                 filtered.map((user) => {
-                  const roleCfg = ROLE_CONFIG[user.role] ?? { label: 'Viewer', cls: 'border border-slate-300 text-slate-700 bg-white' }
+                  const roleCfg = ROLE_CONFIG[user.role] ?? { label: 'Visualizador', cls: 'border border-slate-300 text-slate-700 bg-white' }
                   const initials = getInitials(user.name)
                   const avatarBg = avatarColor(user.name)
                   const statusCls = user.active ? 'bg-teal-50 text-teal-700' : 'bg-slate-100 text-slate-500'
