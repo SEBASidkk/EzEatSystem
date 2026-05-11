@@ -10,6 +10,7 @@ interface Credential {
   id: string
   name: string
   category: string
+  email?: string | null
   updatedAt: Date
   restaurant?: Restaurant | null
 }
@@ -105,7 +106,7 @@ export function VaultList({ credentials, isAdmin }: { credentials: Credential[];
         <table className="w-full text-sm min-w-[700px]">
           <thead className="border-b border-slate-100">
             <tr>
-              {['Nombre', 'Categoría', 'Negocio', 'Valor', 'Estado', 'Último acceso', 'Acciones'].map((h) => (
+              {['Nombre', 'Categoría', 'Correo', 'Negocio', 'Valor', 'Estado', 'Último acceso', 'Acciones'].map((h) => (
                 <th key={h} className="px-5 py-3 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
                   {h}
                 </th>
@@ -131,6 +132,13 @@ export function VaultList({ credentials, isAdmin }: { credentials: Credential[];
                     </td>
                     <td className="px-5 py-3.5">
                       <span className="text-xs text-slate-600">{CAT_LABEL[c.category] ?? c.category}</span>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      {c.email ? (
+                        <span className="text-xs text-slate-600">{c.email}</span>
+                      ) : (
+                        <span className="text-xs text-slate-400">—</span>
+                      )}
                     </td>
                     <td className="px-5 py-3.5">
                       {c.restaurant ? (

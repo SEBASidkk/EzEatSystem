@@ -30,6 +30,7 @@ export async function listCredentials() {
     id: true,
     name: true,
     category: true,
+    email: true,
     notes: true,
     restaurantId: true,
     restaurant: { select: { id: true, name: true } },
@@ -54,6 +55,7 @@ export async function createCredential(formData: FormData) {
     value: formData.get('value') as string,
     category: formData.get('category') as string,
     restaurantId: (formData.get('restaurantId') as string) || undefined,
+    email: (formData.get('email') as string) || undefined,
     notes: (formData.get('notes') as string) || undefined,
     sharedWith: [] as string[],
   }
@@ -61,6 +63,7 @@ export async function createCredential(formData: FormData) {
     ...raw,
     name: sanitizeText(raw.name),
     notes: raw.notes ? sanitizeText(raw.notes) : undefined,
+    email: raw.email || undefined,
   })
   const encrypted = encrypt(parsed.value, getVaultKey())
   const credential = await prisma.credential.create({
@@ -71,6 +74,7 @@ export async function createCredential(formData: FormData) {
       iv: encrypted.iv,
       tag: encrypted.tag,
       userId: user.id,
+      email: parsed.email ?? null,
       notes: parsed.notes,
       restaurantId: parsed.restaurantId ?? null,
     },

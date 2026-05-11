@@ -65,6 +65,7 @@ model Credential {
   encryptedValue String
   iv             String
   tag            String
+  email          String?
   notes          String?
   restaurantId   String?
   restaurant     Restaurant? @relation(fields: [restaurantId], references: [id])

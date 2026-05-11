@@ -111,6 +111,22 @@ export function NewCredentialForm({ restaurants }: { restaurants: Restaurant[] }
             />
           </div>
 
+          {/* Email (ACCOUNT only) */}
+          {category === 'ACCOUNT' && (
+            <div className="px-5 py-4 border-b border-slate-100">
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-widest mb-2">
+                Correo electrónico
+                <span className="ml-1.5 text-slate-400 normal-case font-normal text-[11px]">opcional</span>
+              </label>
+              <input
+                name="email"
+                type="email"
+                placeholder="usuario@ejemplo.com"
+                className="w-full px-0 py-1 bg-transparent text-slate-900 text-sm placeholder-slate-400 border-0 focus:outline-none focus:ring-0"
+              />
+            </div>
+          )}
+
           {/* Value */}
           <div className="px-5 py-4 border-b border-slate-100">
             <div className="flex items-center justify-between mb-2">

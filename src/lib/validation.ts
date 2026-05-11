@@ -12,6 +12,7 @@ export const createCredentialSchema = z.object({
   category: z.enum(['SERVICE', 'RESTAURANT', 'ACCOUNT', 'OTHER']),
   restaurantId: z.string().optional(),
   sharedWith: z.array(z.string()).max(20).default([]),
+  email: z.string().email().optional().or(z.literal('')).transform(v => v || undefined),
   notes: z.string().max(500).optional(),
 })
 
