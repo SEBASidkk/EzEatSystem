@@ -1,4 +1,5 @@
 'use client'
+import { useState, useEffect } from 'react'
 import type { GanttTask } from '@/actions/client-projects'
 
 interface Props {
@@ -7,43 +8,48 @@ interface Props {
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
-function parseDate(s: string) { return new Date(s + 'T00:00:00') }
+// Parse as UTC noon to avoid timezone shifts between server (UTC) and client (local tz)
+function parseDate(s: string) {
+  const [y, m, d] = s.split('-').map(Number)
+  return new Date(Date.UTC(y, m - 1, d, 12, 0, 0))
+}
 
 function daysBetween(a: Date, b: Date) {
   return Math.max(1, Math.ceil((b.getTime() - a.getTime()) / 86_400_000))
 }
 
+// Round to 3 decimal places to guarantee server/client style string equality
 function toLeft(date: Date, minDate: Date, totalDays: number) {
   const off = Math.max(0, (date.getTime() - minDate.getTime()) / 86_400_000)
-  return (off / totalDays) * 100
+  return Math.round((off / totalDays) * 100_000) / 1_000
 }
 
 function toWidth(startDate: Date, endDate: Date, minDate: Date, totalDays: number) {
   const left  = toLeft(startDate, minDate, totalDays)
   const right = toLeft(endDate,   minDate, totalDays)
-  return Math.max(0.4, right - left)
+  return Math.max(0.4, Math.round((right - left) * 1_000) / 1_000)
 }
 
 function monthLabels(start: Date, totalDays: number) {
   const labels: { label: string; left: number; width: number }[] = []
-  const cursor = new Date(start)
-  cursor.setDate(1)
+  // Cursor at UTC 1st of month at noon
+  const cursor = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1, 12, 0, 0))
   const rangeEnd = new Date(start.getTime() + totalDays * 86_400_000)
 
   while (cursor <= rangeEnd) {
     const monthStart = new Date(cursor)
-    const monthEnd   = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0)
+    const monthEnd   = new Date(Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth() + 1, 0, 12, 0, 0))
     const startOff   = Math.max(0, (monthStart.getTime() - start.getTime()) / 86_400_000)
     const endOff     = Math.min(totalDays, (monthEnd.getTime() - start.getTime()) / 86_400_000)
     const w          = endOff - startOff
     if (w > 0) {
       labels.push({
-        label: cursor.toLocaleDateString('es-MX', { month: 'short', year: '2-digit' }),
-        left:  (startOff / totalDays) * 100,
-        width: (w / totalDays) * 100,
+        label: cursor.toLocaleDateString('es-MX', { month: 'short', year: '2-digit', timeZone: 'UTC' }),
+        left:  Math.round((startOff / totalDays) * 100_000) / 1_000,
+        width: Math.round((w / totalDays) * 100_000) / 1_000,
       })
     }
-    cursor.setMonth(cursor.getMonth() + 1)
+    cursor.setUTCMonth(cursor.getUTCMonth() + 1)
   }
   return labels
 }
@@ -69,7 +75,36 @@ const PRIORITY_CFG = {
 const LABEL_W = 176 // px — left column width
 
 export function GanttChart({ tasks }: Props) {
-  if (!tasks.length) {
+  // Today rendered only on client to avoid server/client hydration mismatch
+  const [todayLeft, setTodayLeft] = useState<number | null>(null)
+
+  // Build date range (all hooks must come before any early return)
+  const hasTasks = tasks.length > 0
+  const allDates: Date[] = hasTasks
+    ? tasks.flatMap(t => [
+        parseDate(t.start), parseDate(t.end),
+        ...(t.actualStart ? [parseDate(t.actualStart)] : []),
+        ...(t.actualEnd   ? [parseDate(t.actualEnd)]   : []),
+      ])
+    : [new Date()]
+  const minDateRaw = new Date(Math.min(...allDates.map(d => d.getTime())))
+  const maxDateRaw = new Date(Math.max(...allDates.map(d => d.getTime())))
+  minDateRaw.setUTCDate(minDateRaw.getUTCDate() - 2)
+  maxDateRaw.setUTCDate(maxDateRaw.getUTCDate() + 2)
+  const totalDays = daysBetween(minDateRaw, maxDateRaw)
+
+  useEffect(() => {
+    if (!hasTasks) return
+    const now = new Date()
+    const todayUTC = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0))
+    if (todayUTC >= minDateRaw && todayUTC <= maxDateRaw) {
+      setTodayLeft(toLeft(todayUTC, minDateRaw, totalDays))
+    }
+  // minDateRaw/maxDateRaw/totalDays are derived from stable task props — intentionally omitted
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasTasks])
+
+  if (!hasTasks) {
     return (
       <div className="flex items-center justify-center h-24 text-sm text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
         Sin tareas en la gráfica de Gantt
@@ -77,25 +112,10 @@ export function GanttChart({ tasks }: Props) {
     )
   }
 
-  // Build date range from planned + actual dates
-  const allDates: Date[] = []
-  tasks.forEach(t => {
-    allDates.push(parseDate(t.start), parseDate(t.end))
-    if (t.actualStart) allDates.push(parseDate(t.actualStart))
-    if (t.actualEnd)   allDates.push(parseDate(t.actualEnd))
-  })
-  const minDate    = new Date(Math.min(...allDates.map(d => d.getTime())))
-  const maxDate    = new Date(Math.max(...allDates.map(d => d.getTime())))
-  // Add 2-day padding on each side
-  minDate.setDate(minDate.getDate() - 2)
-  maxDate.setDate(maxDate.getDate() + 2)
-  const totalDays  = daysBetween(minDate, maxDate)
-  const labels     = monthLabels(minDate, totalDays)
-
-  // Today position
-  const today       = new Date()
-  const showToday   = today >= minDate && today <= maxDate
-  const todayLeft   = toLeft(today, minDate, totalDays)
+  const minDate   = minDateRaw
+  const maxDate   = maxDateRaw
+  const labels    = monthLabels(minDate, totalDays)
+  const showToday = todayLeft !== null
 
   // Variance summary
   const hasDual = tasks.some(t => t.actualStart && t.actualEnd)
