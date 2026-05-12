@@ -129,6 +129,23 @@ model RateLimit {
   @@index([resetAt])
 }
 
+model ClientProject {
+  id           String   @id @default(cuid())
+  accessCode   String   @unique
+  clientName   String
+  projectName  String
+  startDate    DateTime
+  estimatedEnd DateTime
+  modules      Json     @default("[]")
+  updates      Json     @default("[]")
+  gantt        Json     @default("[]")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([accessCode])
+}
+
 model AuditLog {
   id           String   @id @default(cuid())
   userId       String

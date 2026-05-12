@@ -4,15 +4,16 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import {
   LayoutDashboard, Users2, KeyRound, ClipboardCheck,
-  ShieldCheck, History, Plus, Menu, X,
+  ShieldCheck, History, Plus, Menu, X, MonitorSmartphone,
 } from 'lucide-react'
 
 const navItems = [
-  { href: '/dashboard',   label: 'Panel General',      icon: LayoutDashboard, adminOnly: false },
-  { href: '/restaurants', label: 'Negocios Afiliados', icon: Users2,          adminOnly: false },
-  { href: '/vault',       label: 'Bóveda de Accesos',  icon: KeyRound,        adminOnly: false },
-  { href: '/tasks',       label: 'Gestor de Tareas',   icon: ClipboardCheck,  adminOnly: false },
-  { href: '/accounts',    label: 'Control de Acceso',  icon: ShieldCheck,     adminOnly: true  },
+  { href: '/dashboard',   label: 'Panel General',      icon: LayoutDashboard,    adminOnly: false },
+  { href: '/restaurants', label: 'Negocios Afiliados', icon: Users2,             adminOnly: false },
+  { href: '/vault',       label: 'Bóveda de Accesos',  icon: KeyRound,           adminOnly: false },
+  { href: '/tasks',       label: 'Gestor de Tareas',   icon: ClipboardCheck,     adminOnly: false },
+  { href: '/proyectos',   label: 'Portales Cliente',   icon: MonitorSmartphone,  adminOnly: false },
+  { href: '/accounts',    label: 'Control de Acceso',  icon: ShieldCheck,        adminOnly: true  },
 ]
 
 const bottomItems = [
