@@ -4,9 +4,9 @@ import type { ProjectComment } from '@/actions/client-projects'
 
 export async function POST(
   req: Request,
-  { params }: { params: Promise<{ code: string }> },
+  { params }: { params: { code: string } },
 ) {
-  const { code } = await params
+  const { code } = params
 
   let body: { moduleIndex: number; authorName: string; message: string }
   try {

@@ -31,7 +31,7 @@ function toWidth(startDate: Date, endDate: Date, minDate: Date, totalDays: numbe
 }
 
 function monthLabels(start: Date, totalDays: number) {
-  const labels: { label: string; left: number; width: number }[] = []
+  const labels: { label: string; left: number; width: number; right: number }[] = []
   // Cursor at UTC 1st of month at noon
   const cursor = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1, 12, 0, 0))
   const rangeEnd = new Date(start.getTime() + totalDays * 86_400_000)
@@ -43,10 +43,13 @@ function monthLabels(start: Date, totalDays: number) {
     const endOff     = Math.min(totalDays, (monthEnd.getTime() - start.getTime()) / 86_400_000)
     const w          = endOff - startOff
     if (w > 0) {
+      const left  = Math.round((startOff / totalDays) * 100_000) / 1_000
+      const right = Math.round((endOff   / totalDays) * 100_000) / 1_000
       labels.push({
         label: cursor.toLocaleDateString('es-MX', { month: 'short', year: '2-digit', timeZone: 'UTC' }),
-        left:  Math.round((startOff / totalDays) * 100_000) / 1_000,
+        left,
         width: Math.round((w / totalDays) * 100_000) / 1_000,
+        right, // pre-computed to avoid float addition drift in JSX
       })
     }
     cursor.setUTCMonth(cursor.getUTCMonth() + 1)
@@ -242,7 +245,7 @@ export function GanttChart({ tasks }: Props) {
                     <div
                       key={i}
                       className="absolute inset-y-0 border-r border-slate-100"
-                      style={{ left: `${l.left + l.width}%` }}
+                      style={{ left: `${l.right}%` }}
                     />
                   ))}
 
