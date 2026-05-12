@@ -378,7 +378,7 @@ export function NewTaskForm({ members }: { members: TeamMember[] }) {
                 <p className="text-xs font-semibold text-blue-700 uppercase tracking-widest">Tip del equipo</p>
               </div>
               <ul className="space-y-2 text-xs text-blue-700">
-                <li>• Título corto y accionable ("Configurar X" no "Hay que ver X")</li>
+                <li>• Título corto y accionable (&quot;Configurar X&quot; no &quot;Hay que ver X&quot;)</li>
                 <li>• Una tarea = una responsabilidad</li>
                 <li>• Agrega subtareas para pasos complejos</li>
                 <li>• Asigna fecha límite para visibilidad en el tablero</li>

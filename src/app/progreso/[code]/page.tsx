@@ -1,8 +1,8 @@
 import { prisma } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import {
-  CheckCircle2, Clock, Circle, CalendarDays, Zap, Utensils,
-  TrendingUp, MessageSquare, ThumbsUp, ThumbsDown, Phone,
+  Clock, Circle, CalendarDays, Utensils,
+  TrendingUp, MessageSquare, Phone,
   Mail, MessageCircle, Video, Globe, Printer, Users,
 } from 'lucide-react'
 import { GanttChart } from '@/components/proyectos/gantt-chart'
