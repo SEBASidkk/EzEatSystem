@@ -1,7 +1,7 @@
 import { getClientProject, updateClientProject, deleteClientProject } from '@/actions/client-projects'
 import { ProjectForm } from '@/components/proyectos/project-form'
 import { notFound, redirect } from 'next/navigation'
-import type { ProjectModule, ProjectUpdate, GanttTask } from '@/actions/client-projects'
+import type { ProjectModule, ProjectUpdate, GanttTask, ProjectContact, ProjectCommunication } from '@/actions/client-projects'
 
 export default async function EditProyectoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -30,10 +30,12 @@ export default async function EditProyectoPage({ params }: { params: Promise<{ i
         projectName:  project.projectName,
         startDate:    project.startDate,
         estimatedEnd: project.estimatedEnd,
-        modules:      project.modules as unknown as ProjectModule[],
-        updates:      project.updates as unknown as ProjectUpdate[],
-        gantt:        (project.gantt ?? []) as unknown as GanttTask[],
-        active:       project.active,
+        modules:        project.modules        as unknown as ProjectModule[],
+        updates:        project.updates        as unknown as ProjectUpdate[],
+        gantt:          (project.gantt ?? [])  as unknown as GanttTask[],
+        active:         project.active,
+        contacts:       (project.contacts       ?? []) as unknown as ProjectContact[],
+        communications: (project.communications ?? []) as unknown as ProjectCommunication[],
       }}
       onSubmit={handleUpdate}
       onDelete={handleDelete}

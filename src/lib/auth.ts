@@ -39,7 +39,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const setting = await prisma.systemSettings.findUnique({ where: { key: 'idle_timeout_minutes' } })
         const idleTimeoutMs = parseInt(setting?.value ?? '480') * 60 * 1000
 
-        return { id: user.id, email: user.email, name: user.name, role: user.role, twoFactorEnabled: user.twoFactorEnabled, idleTimeoutMs }
+        const rememberMe = parsed.data.rememberMe ?? true
+        return { id: user.id, email: user.email, name: user.name, role: user.role, twoFactorEnabled: user.twoFactorEnabled, idleTimeoutMs, rememberMe }
       },
     }),
   ],

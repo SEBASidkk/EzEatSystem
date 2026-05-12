@@ -130,18 +130,26 @@ model RateLimit {
 }
 
 model ClientProject {
-  id           String   @id @default(cuid())
-  accessCode   String   @unique
-  clientName   String
-  projectName  String
-  startDate    DateTime
-  estimatedEnd DateTime
-  modules      Json     @default("[]")
-  updates      Json     @default("[]")
-  gantt        Json     @default("[]")
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id             String   @id @default(cuid())
+  accessCode     String   @unique
+  clientName     String
+  projectName    String
+  startDate      DateTime
+  estimatedEnd   DateTime
+  modules        Json     @default("[]")
+  updates        Json     @default("[]")
+  gantt          Json     @default("[]")
+  active         Boolean  @default(true)
+  /// Client contacts (name, email, phone, role)
+  contacts       Json     @default("[]")
+  /// Ez-eat team communication channels shown in portal
+  communications Json     @default("[]")
+  /// Comments left by client on modules
+  comments       Json     @default("[]")
+  /// Module approvals/rejections by client
+  approvals      Json     @default("[]")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([accessCode])
 }
