@@ -4,6 +4,7 @@ export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
   totpCode: z.string().optional(),
+  rememberMe: z.string().optional().transform(v => v === 'true'),
 })
 
 export const createCredentialSchema = z.object({
