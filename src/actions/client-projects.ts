@@ -23,10 +23,22 @@ export interface ProjectUpdate {
 export interface GanttTask {
   id: string
   name: string
+  /** Planned (ideal) start date — YYYY-MM-DD */
   start: string
+  /** Planned (ideal) end date — YYYY-MM-DD */
   end: string
+  /** Actual start date — YYYY-MM-DD (real execution) */
+  actualStart?: string
+  /** Actual end date — YYYY-MM-DD (real execution) */
+  actualEnd?: string
+  /** 0–100 completion percentage */
   progress: number
   color: string
+  status: 'no_iniciado' | 'en_progreso' | 'completado' | 'bloqueado'
+  priority?: 'baja' | 'media' | 'alta' | 'critica'
+  assignee?: string
+  milestone?: boolean
+  notes?: string
 }
 
 export async function listClientProjects() {
