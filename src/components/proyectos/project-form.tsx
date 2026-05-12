@@ -3,15 +3,26 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   ArrowLeft, Save, Plus, Trash2, Link2, AlertCircle,
-  ChevronDown, ChevronUp, Calendar, User, Hash, ToggleLeft,
+  ChevronDown, ChevronUp, Calendar, User, Hash,
+  Phone, Mail, MessageCircle, Video, Hash as SlackIcon, Globe,
 } from 'lucide-react'
-import type { ProjectModule, ProjectUpdate, GanttTask } from '@/actions/client-projects'
+import type { ProjectModule, ProjectUpdate, GanttTask, ProjectContact, ProjectCommunication } from '@/actions/client-projects'
 import { GanttEditor } from './gantt-editor'
 
 const STATUS_OPTIONS = [
   { value: 'pendiente',   label: 'Pendiente',   color: '#94A3B8' },
   { value: 'en_progreso', label: 'En progreso', color: '#3B82F6' },
   { value: 'completado',  label: 'Completado',  color: '#10B981' },
+]
+
+const COMM_TYPES: { value: ProjectCommunication['type']; label: string; icon: React.ElementType; placeholder: string }[] = [
+  { value: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, placeholder: '+52 555 000 0000' },
+  { value: 'email',    label: 'Email',    icon: Mail,          placeholder: 'equipo@ezeat.com'  },
+  { value: 'phone',    label: 'Teléfono', icon: Phone,         placeholder: '+52 555 000 0000'  },
+  { value: 'slack',    label: 'Slack',    icon: SlackIcon,     placeholder: '#canal o @usuario' },
+  { value: 'meet',     label: 'Meet',     icon: Video,         placeholder: 'https://meet.google.com/...' },
+  { value: 'teams',    label: 'Teams',    icon: Video,         placeholder: 'https://teams.microsoft.com/...' },
+  { value: 'other',    label: 'Otro',     icon: Globe,         placeholder: 'URL o dato de contacto' },
 ]
 
 interface Props {
@@ -27,6 +38,8 @@ interface Props {
     updates: ProjectUpdate[]
     gantt: GanttTask[]
     active: boolean
+    contacts: ProjectContact[]
+    communications: ProjectCommunication[]
   }
   onSubmit: (data: {
     accessCode: string
@@ -38,6 +51,8 @@ interface Props {
     updates: ProjectUpdate[]
     gantt: GanttTask[]
     active: boolean
+    contacts: ProjectContact[]
+    communications: ProjectCommunication[]
   }) => Promise<void>
   onDelete?: () => Promise<void>
 }
@@ -73,15 +88,17 @@ export function ProjectForm({ mode, initialData, onSubmit, onDelete }: Props) {
   const [isDeleting, startDelete]     = useTransition()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
-  const [accessCode,   setAccessCode]   = useState(initialData?.accessCode   ?? '')
-  const [clientName,   setClientName]   = useState(initialData?.clientName   ?? '')
-  const [projectName,  setProjectName]  = useState(initialData?.projectName  ?? '')
-  const [startDate,    setStartDate]    = useState(initialData ? toInputDate(initialData.startDate)    : '')
-  const [estimatedEnd, setEstimatedEnd] = useState(initialData ? toInputDate(initialData.estimatedEnd) : '')
-  const [active,       setActive]       = useState(initialData?.active ?? true)
-  const [modules,      setModules]      = useState<ProjectModule[]>(initialData?.modules ?? [])
-  const [updates,      setUpdates]      = useState<ProjectUpdate[]>(initialData?.updates ?? [])
-  const [gantt,        setGantt]        = useState<GanttTask[]>(initialData?.gantt ?? [])
+  const [accessCode,      setAccessCode]      = useState(initialData?.accessCode   ?? '')
+  const [clientName,      setClientName]      = useState(initialData?.clientName   ?? '')
+  const [projectName,     setProjectName]     = useState(initialData?.projectName  ?? '')
+  const [startDate,       setStartDate]       = useState(initialData ? toInputDate(initialData.startDate)    : '')
+  const [estimatedEnd,    setEstimatedEnd]    = useState(initialData ? toInputDate(initialData.estimatedEnd) : '')
+  const [active,          setActive]          = useState(initialData?.active ?? true)
+  const [modules,         setModules]         = useState<ProjectModule[]>(initialData?.modules ?? [])
+  const [updates,         setUpdates]         = useState<ProjectUpdate[]>(initialData?.updates ?? [])
+  const [gantt,           setGantt]           = useState<GanttTask[]>(initialData?.gantt ?? [])
+  const [contacts,        setContacts]        = useState<ProjectContact[]>(initialData?.contacts ?? [])
+  const [communications,  setCommunications]  = useState<ProjectCommunication[]>(initialData?.communications ?? [])
 
   function addModule() {
     setModules(prev => [...prev, { name: '', status: 'pendiente', progress: 0 }])
@@ -113,7 +130,7 @@ export function ProjectForm({ mode, initialData, onSubmit, onDelete }: Props) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     startTransition(async () => {
-      await onSubmit({ accessCode, clientName, projectName, startDate, estimatedEnd, modules, updates, gantt, active })
+      await onSubmit({ accessCode, clientName, projectName, startDate, estimatedEnd, modules, updates, gantt, active, contacts, communications })
       router.push('/proyectos')
       router.refresh()
     })
@@ -441,6 +458,172 @@ export function ProjectForm({ mode, initialData, onSubmit, onDelete }: Props) {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </section>
+
+            {/* ── Sección: Contactos del cliente ─────────────────── */}
+            <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-slate-700 uppercase tracking-widest">Contactos del cliente</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Personas del lado del cliente que siguen el proyecto</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setContacts(prev => [...prev, { name: '', email: '', phone: '', role: '' }])}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors"
+                >
+                  <Plus size={14} /> Agregar contacto
+                </button>
+              </div>
+
+              {contacts.length === 0 ? (
+                <div className="px-6 py-10 text-center">
+                  <User size={24} className="text-slate-200 mx-auto mb-2" />
+                  <p className="text-sm text-slate-400">Sin contactos registrados</p>
+                  <p className="text-xs text-slate-300 mt-1">Agrega las personas clave del lado del cliente</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {contacts.map((c, i) => (
+                    <div key={i} className="p-6 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Contacto {i + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => setContacts(prev => prev.filter((_, idx) => idx !== i))}
+                          className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Nombre *</label>
+                          <input
+                            required
+                            value={c.name}
+                            onChange={e => setContacts(prev => prev.map((x, idx) => idx === i ? { ...x, name: e.target.value } : x))}
+                            placeholder="Nombre completo"
+                            className="w-full px-4 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-slate-300 transition-shadow"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Rol / Cargo</label>
+                          <input
+                            value={c.role ?? ''}
+                            onChange={e => setContacts(prev => prev.map((x, idx) => idx === i ? { ...x, role: e.target.value } : x))}
+                            placeholder="ej. CEO, Project Manager"
+                            className="w-full px-4 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-slate-300 transition-shadow"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Correo</label>
+                          <input
+                            type="email"
+                            value={c.email ?? ''}
+                            onChange={e => setContacts(prev => prev.map((x, idx) => idx === i ? { ...x, email: e.target.value } : x))}
+                            placeholder="correo@empresa.com"
+                            className="w-full px-4 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-slate-300 transition-shadow"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Teléfono / WhatsApp</label>
+                          <input
+                            value={c.phone ?? ''}
+                            onChange={e => setContacts(prev => prev.map((x, idx) => idx === i ? { ...x, phone: e.target.value } : x))}
+                            placeholder="+52 555 000 0000"
+                            className="w-full px-4 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-slate-300 transition-shadow"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* ── Sección: Formas de contacto Ez-eat ─────────────── */}
+            <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-slate-700 uppercase tracking-widest">Contacto con el equipo Ez-eat</p>
+                  <p className="text-xs text-slate-400 mt-0.5">El cliente verá estos canales en su portal para comunicarse</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCommunications(prev => [...prev, { type: 'whatsapp', label: 'WhatsApp', value: '' }])}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors"
+                >
+                  <Plus size={14} /> Agregar canal
+                </button>
+              </div>
+
+              {communications.length === 0 ? (
+                <div className="px-6 py-10 text-center">
+                  <MessageCircle size={24} className="text-slate-200 mx-auto mb-2" />
+                  <p className="text-sm text-slate-400">Sin canales configurados</p>
+                  <p className="text-xs text-slate-300 mt-1">Agrega cómo puede contactar el cliente al equipo</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {communications.map((comm, i) => {
+                    const typeCfg = COMM_TYPES.find(t => t.value === comm.type) ?? COMM_TYPES[0]!
+                    const Icon = typeCfg.icon
+                    return (
+                      <div key={i} className="p-6">
+                        <div className="flex items-start gap-4">
+                          <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
+                            <Icon size={18} className="text-slate-500" />
+                          </div>
+                          <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                              <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Canal</label>
+                              <select
+                                value={comm.type}
+                                onChange={e => {
+                                  const t = COMM_TYPES.find(x => x.value === e.target.value) ?? COMM_TYPES[0]!
+                                  setCommunications(prev => prev.map((x, idx) => idx === i ? { ...x, type: t.value, label: t.label } : x))
+                                }}
+                                className="w-full px-4 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
+                              >
+                                {COMM_TYPES.map(t => (
+                                  <option key={t.value} value={t.value}>{t.label}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Etiqueta visible</label>
+                              <input
+                                value={comm.label}
+                                onChange={e => setCommunications(prev => prev.map((x, idx) => idx === i ? { ...x, label: e.target.value } : x))}
+                                placeholder="ej. Soporte Ez-eat"
+                                className="w-full px-4 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-slate-300"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Valor / Link</label>
+                              <input
+                                required
+                                value={comm.value}
+                                onChange={e => setCommunications(prev => prev.map((x, idx) => idx === i ? { ...x, value: e.target.value } : x))}
+                                placeholder={typeCfg.placeholder}
+                                className="w-full px-4 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-slate-300"
+                              />
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setCommunications(prev => prev.filter((_, idx) => idx !== i))}
+                            className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors mt-6 shrink-0"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </section>

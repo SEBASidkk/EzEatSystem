@@ -1,5 +1,5 @@
 import { listClientProjects } from '@/actions/client-projects'
-import { Plus, MonitorSmartphone, ExternalLink, CheckCircle2, Clock, Circle } from 'lucide-react'
+import { Plus, MonitorSmartphone, ExternalLink, CheckCircle2, Clock, Circle, BarChart2 } from 'lucide-react'
 import Link from 'next/link'
 import type { ProjectModule } from '@/actions/client-projects'
 
@@ -27,6 +27,13 @@ export default async function ProyectosPage() {
             <MonitorSmartphone size={14} className="text-slate-400" />
             <span className="font-semibold">{projects.length}</span> portales
           </div>
+          <Link
+            href="/proyectos/analytics"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors"
+          >
+            <BarChart2 size={15} />
+            Analíticas
+          </Link>
           <Link
             href="/proyectos/new"
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity"
