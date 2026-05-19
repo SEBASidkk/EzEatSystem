@@ -3,8 +3,8 @@ import { useState, useTransition } from 'react'
 import { saveFeatures } from '@/actions/features'
 import type { FeatureFlag, FeatureCategory } from '@/lib/features-client'
 import {
-  Zap, Monitor, Truck, Boxes, Receipt, BarChart3, Sparkles,
-  Tag, Users, Settings, Check, X, ShoppingBag, CreditCard,
+  Monitor, Truck, Receipt, BarChart3,
+  Tag, Users, Check, X, ShoppingBag,
 } from 'lucide-react'
 
 const CATEGORY_META: Record<FeatureCategory, { label: string; icon: React.ReactNode; color: string }> = {
