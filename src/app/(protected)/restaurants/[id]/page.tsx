@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db'
 import {
   ArrowLeft, Globe, Mail, Phone, CreditCard, Calendar,
   KeyRound, Database, Box, Building2, Clock, ExternalLink,
-  ShieldAlert, Pencil,
+  ShieldAlert, Pencil, Sliders,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -134,16 +134,24 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
             <p className="text-xs text-slate-400 mt-0.5 font-mono">ID: {restaurant.ezeatId}</p>
           )}
         </div>
-        {restaurant.domain && (
-          <a
-            href={`https://${restaurant.domain}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-4 py-2.5 text-xs font-medium text-blue-600 border border-blue-200 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors"
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/restaurants/${restaurant.id}/features`}
+            className="flex items-center gap-2 px-4 py-2.5 text-xs font-medium text-purple-700 border border-purple-200 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors"
           >
-            <ExternalLink size={13} /> Ver sitio
-          </a>
-        )}
+            <Sliders size={13} /> Funciones
+          </Link>
+          {restaurant.domain && (
+            <a
+              href={`https://${restaurant.domain}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2.5 text-xs font-medium text-blue-600 border border-blue-200 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors"
+            >
+              <ExternalLink size={13} /> Ver sitio
+            </a>
+          )}
+        </div>
       </div>
 
       {/* ── Main grid ────────────────────────────────────────────────── */}
