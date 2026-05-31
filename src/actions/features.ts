@@ -29,9 +29,9 @@ export async function saveFeatures(
   }
 }
 
-export async function fetchPlans(): Promise<PlanPreset[]> {
+export async function fetchPlans(ezeatId: string): Promise<PlanPreset[]> {
   await requireSession()
-  return getPlans()
+  return getPlans(ezeatId)
 }
 
 export async function applyPreset(

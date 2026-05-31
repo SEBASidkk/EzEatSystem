@@ -34,7 +34,58 @@ async function main() {
   console.log(`Admin user created: ${email}`)
 }
 
-main().catch(console.error).finally(async () => {
-  await prisma.$disconnect()
-  await pool.end()
-})
+/**
+ * Opción A multi-instancia: registra los restaurantes + sus backends propios.
+ */
+async function seedBackends() {
+  const INTERNAL_KEY = process.env.EZEAT_API_KEY || 'ezeat-internal-secret-2026'
+
+  const instances = [
+    {
+      name: 'QueFresa',
+      ezeatId: '69bb8331ce58d760c4324a9d',
+      domain: 'quefresa.ezeat.com.mx',
+      backend: {
+        label: 'QueFresa',
+        baseUrl: process.env.SEED_QUEFRESA_URL || 'https://quefresa.ezeat.com.mx',
+        apiKey: INTERNAL_KEY,
+        port: 3000,
+      },
+    },
+    {
+      name: "Tacos Habanna's",
+      ezeatId: '6a1bc491bc163d2432e3ea1a',
+      domain: 'tacoshabanas.ezeat.com.mx',
+      backend: {
+        label: 'Habanas',
+        baseUrl: process.env.SEED_HABANAS_URL || 'https://tacoshabanas.ezeat.com.mx',
+        apiKey: INTERNAL_KEY,
+        port: 3002,
+      },
+    },
+  ]
+
+  for (const inst of instances) {
+    const restaurant = await prisma.restaurant.upsert({
+      where: { ezeatId: inst.ezeatId },
+      update: { name: inst.name, domain: inst.domain, status: 'ACTIVE' },
+      create: { name: inst.name, ezeatId: inst.ezeatId, domain: inst.domain, status: 'ACTIVE' },
+    })
+
+    await prisma.backend.upsert({
+      where: { restaurantId: restaurant.id },
+      update: { ...inst.backend, active: true },
+      create: { restaurantId: restaurant.id, ...inst.backend, active: true },
+    })
+
+    console.log(`Backend registrado: ${inst.backend.label} → ${inst.backend.baseUrl}`)
+  }
+}
+
+main()
+  .then(seedBackends)
+  .catch(console.error)
+  .finally(async () => {
+    await prisma.$disconnect()
+    await pool.end()
+  })

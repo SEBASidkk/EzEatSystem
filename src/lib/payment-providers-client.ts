@@ -1,5 +1,4 @@
-const BASE_URL = process.env.EZEAT_API_URL
-const API_KEY = process.env.EZEAT_API_KEY
+import { resolveBackendByEzeatId, fetchBackend } from '@/lib/backend-registry'
 
 export type PaymentProviderName = 'clip' | 'mercadopago' | 'stripe' | 'conekta'
 
@@ -29,37 +28,21 @@ export interface UpdatePaymentProviderInput {
   }>
 }
 
-async function fetchEzEat<T>(path: string, options?: RequestInit): Promise<T> {
-  if (!BASE_URL || !API_KEY) throw new Error('Ez-eat API not configured')
-  const res = await fetch(`${BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      'x-api-key': API_KEY,
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
-    cache: 'no-store',
-  })
-  if (!res.ok) {
-    const txt = await res.text().catch(() => '')
-    throw new Error(`Ez-eat API ${res.status}: ${txt.slice(0, 200)}`)
-  }
-  return res.json() as Promise<T>
-}
-
-export async function getPaymentProviders(restaurantId: string): Promise<PaymentProviderInfo[]> {
-  const res = await fetchEzEat<{ success: boolean; data: PaymentProviderInfo[] }>(
-    `/internal/restaurants/${restaurantId}/payment-providers`
+export async function getPaymentProviders(ezeatId: string): Promise<PaymentProviderInfo[]> {
+  const backend = await resolveBackendByEzeatId(ezeatId)
+  const res = await fetchBackend<{ success: boolean; data: PaymentProviderInfo[] }>(
+    backend, `/internal/restaurants/${ezeatId}/payment-providers`
   )
   return res.data ?? []
 }
 
 export async function updatePaymentProvider(
-  restaurantId: string,
+  ezeatId: string,
   provider: PaymentProviderName,
   data: UpdatePaymentProviderInput
 ): Promise<void> {
-  await fetchEzEat(`/internal/restaurants/${restaurantId}/payment-providers/${provider}`, {
+  const backend = await resolveBackendByEzeatId(ezeatId)
+  await fetchBackend(backend, `/internal/restaurants/${ezeatId}/payment-providers/${provider}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })

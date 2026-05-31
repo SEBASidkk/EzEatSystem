@@ -23,7 +23,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   try {
     ;[features, plans] = await Promise.all([
       fetchFeatures(restaurant.ezeatId),
-      fetchPlans(),
+      fetchPlans(restaurant.ezeatId),
     ])
   } catch (e) {
     error = e instanceof Error ? e.message : 'Error desconocido'

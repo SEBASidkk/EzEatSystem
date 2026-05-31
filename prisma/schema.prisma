@@ -113,6 +113,29 @@ model Restaurant {
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
   credentials  Credential[]
+  backend      Backend?
+}
+
+/// Opción A multi-instancia: cada restaurante corre su propio backend Ez-eat
+/// (URL + puerto + INTERNAL_API_KEY propios). El dashboard resuelve a qué
+/// instancia pegar según el restaurante seleccionado.
+model Backend {
+  id           String     @id @default(cuid())
+  /// Restaurante dueño de esta instancia (1:1)
+  restaurantId String     @unique
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  label        String
+  /// Base URL del backend, ej: https://quefresa.ezeat.com.mx o http://localhost:3002
+  baseUrl      String
+  /// INTERNAL_API_KEY del backend (header x-api-key)
+  apiKey       String
+  /// Puerto local del proceso PM2 (informativo)
+  port         Int?
+  active       Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([active])
 }
 
 model SystemSettings {
