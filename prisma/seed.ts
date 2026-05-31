@@ -12,8 +12,8 @@ async function main() {
   const password = process.env.SEED_ADMIN_PASSWORD
 
   if (!email || !password) {
-    console.error('Set SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD env vars')
-    process.exit(1)
+    console.warn('SEED_ADMIN_EMAIL/PASSWORD no definidos — saltando creación de admin')
+    return
   }
 
   const existing = await prisma.user.findUnique({ where: { email } })
